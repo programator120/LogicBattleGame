@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Hra s Lukostreleckými Útokmi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            display: flex;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+        
+        .game-section {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-section {
+            width: 350px;
+            min-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #ffcc00;
+        }
+        
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #f0f0f0;
+        }
+        
+        .game-container {
+            width: 100%;
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            position: relative;
+            border: 4px solid #ffcc00;
+        }
+        
+        #game-board {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: 
+                linear-gradient(rgba(20, 30, 48, 0.8), rgba(36, 59, 85, 0.8)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a1a2e" opacity="0.3"/><path d="M0 0L100 100M100 0L0 100" stroke="%233a3a5a" stroke-width="1" opacity="0.3"/></svg>');
+            background-size: 100px;
+            cursor: pointer;
+        }
+        
+        .player {
+            width: 70px;
+            height: 70px;
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s ease;
+            z-index: 10;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        #player1 {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            left: 150px;
+            top: 200px;
+            border: 3px solid #ffcc00;
+        }
+        
+        #player2 {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            left: 600px;
+            top: 200px;
+            border: 3px solid #ffcc00;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-bottom: 3px solid #ffcc00;
+        }
+        
+        .player-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 25px;
+            border-radius: 15px;
+            min-width: 180px;
+            background: rgba(30, 30, 30, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .player1-status {
+            border-left: 5px solid #ff416c;
+        }
+        
+        .player2-status {
+            border-right: 5px solid #11998e;
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .hp-bar {
+            width: 100%;
+            height: 25px;
+            background-color: #222;
+            border-radius: 12px;
+            margin-top: 8px;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .player1-status .hp-fill {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+        
+        .player2-status .hp-fill {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+        }
+        
+        .turn-indicator {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 0 20px;
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            border-radius: 50px;
+            color: #1a1a2e;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
+            animation: pulse 1.5s infinite;
+            min-width: 180px;
+        }
+        
+        .time-left {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 204, 0, 0.8); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 204, 0, 1); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 204, 0, 0.8); }
+        }
+        
+        .attack-effect {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            animation: explode 0.8s forwards;
+            z-index: 5;
+        }
+        
+        @keyframes explode {
+            0% { transform: scale(0.1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            font-size: 52px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+            display: none;
+        }
+        
+        .restart-btn {
+            margin-top: 30px;
+            padding: 18px 50px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            font-weight: bold;
+        }
+        
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 75, 43, 0.9);
+        }
+        
+        .announcement-container {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 20;
+        }
+        
+        .announcement {
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffcc00;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #ff9900;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            max-width: 80%;
+        }
+        
+        .announcement.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .critical-hit {
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+        }
+        
+        .heal {
+            color: #33ff77;
+            text-shadow: 0 0 10px rgba(0, 255, 100, 0.7);
+        }
+        
+        .combat-log {
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffcc00;
+            border-radius: 10px;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 1rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .damage-log {
+            color: #ff6666;
+        }
+        
+        .heal-log {
+            color: #66ff99;
+        }
+        
+        .info-log {
+            color: #66aaff;
+        }
+        
+        .critical-log {
+            color: #ff3333;
+            font-weight: bold;
+        }
+        
+        .item-log {
+            color: #ffcc00;
+        }
+        
+        .special-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            animation: rise 2s forwards;
+            z-index: 15;
+        }
+        
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+        
+        /* Štýly pre predmety */
+        .item {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 9;
+            animation: pulse-item 2s infinite;
+            cursor: pointer;
+        }
+        
+        @keyframes pulse-item {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .heal-item {
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px solid #ff3333;
+            color: #ff6666;
+        }
+        
+        .damage-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #333;
+            color: #666;
+        }
+        
+        .boost-item {
+            background: rgba(255, 204, 0, 0.3);
+            border: 2px solid #ffcc00;
+            color: #ffcc00;
+        }
+        
+        .shield-item {
+            background: rgba(0, 123, 255, 0.3);
+            border: 2px solid #007bff;
+            color: #66aaff;
+        }
+        
+        .gold-item {
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+        }
+        
+        .trap-item {
+            background: rgba(139, 0, 0, 0.3);
+            border: 2px solid #8b0000;
+            color: #8b0000;
+        }
+        
+        .time-item {
+            background: rgba(100, 100, 200, 0.3);
+            border: 2px solid #6464c8;
+            color: #a0a0ff;
+        }
+        
+        .info-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffcc00;
+        }
+        
+        .info-card h2 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .rules-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .rules-list li {
+            margin-bottom: 12px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .rules-list li:before {
+            content: "•";
+            color: #ffcc00;
+            font-size: 24px;
+            position: absolute;
+            left: 0;
+            top: -4px;
+        }
+        
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .item-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(30, 30, 40, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+        
+        .heal-item-card {
+            border-left-color: #ff3333;
+        }
+        
+        .damage-item-card {
+            border-left-color: #333;
+        }
+        
+        .boost-item-card {
+            border-left-color: #ffcc00;
+        }
+        
+        .shield-item-card {
+            border-left-color: #007bff;
+        }
+        
+        .gold-item-card {
+            border-left-color: #ffd700;
+        }
+        
+        .trap-item-card {
+            border-left-color: #8b0000;
+        }
+        
+        .time-item-card {
+            border-left-color: #6464c8;
+        }
+        
+        .item-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .item-info h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .item-info p {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        
+        .sound-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(30, 30, 40, 0.6);
+            border-radius: 10px;
+        }
+        
+        .sound-btn {
+            background: #ffcc00;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: #1a1a2e;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #444;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffcc00;
+            cursor: pointer;
+        }
+        
+        .player-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 204, 0, 0.3);
+            border: 1px solid #ffcc00;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 204, 0, 0.5);
+        }
+        
+        /* Range indicators */
+        .range-indicator {
+            position: absolute;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+        
+        .move-range {
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        
+        .attack-range {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        /* Lukostrelecké útoky */
+        .attack-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .attack-option {
+            padding: 10px;
+            background: rgba(30, 30, 40, 0.6);
+            border-radius: 8px;
+            border: 2px solid #ff9900;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+        
+        .attack-option:hover {
+            background: rgba(255, 153, 0, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .attack-option.selected {
+            background: rgba(255, 153, 0, 0.7);
+            box-shadow: 0 0 15px rgba(255, 153, 0, 0.7);
+        }
+        
+        .attack-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .attack-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .arrow {
+            position: absolute;
+            z-index: 8;
+            width: 40px;
+            height: 10px;
+            background: #ff9900;
+            border-radius: 5px;
+            transform-origin: left center;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.7);
+        }
+        
+        .fire-arrow {
+            background: linear-gradient(to right, #ff9900, #ff3300);
+            box-shadow: 0 0 15px rgba(255, 51, 0, 0.7);
+        }
+        
+        .ice-arrow {
+            background: linear-gradient(to right, #66ccff, #0066cc);
+            box-shadow: 0 0 15px rgba(0, 102, 204, 0.7);
+        }
+        
+        .poison-arrow {
+            background: linear-gradient(to right, #99ff33, #339900);
+            box-shadow: 0 0 15px rgba(51, 153, 0, 0.7);
+        }
+        
+        .piercing-arrow {
+            background: linear-gradient(to right, #cccccc, #666666);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Efekty po útokoch */
+        .fire-effect {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,50,0,0) 70%);
+            border-radius: 50%;
+            animation: burn 1.5s infinite alternate;
+            z-index: 7;
+        }
+        
+        @keyframes burn {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 0.9; }
+        }
+        
+        .ice-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(100,200,255,0.5) 0%, rgba(0,100,200,0) 70%);
+            border-radius: 50%;
+            animation: freeze 2s infinite;
+            z-index: 7;
+        }
+        
+        @keyframes freeze {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+        
+        .poison-effect {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, rgba(100,255,100,0.5) 0%, rgba(0,150,0,0) 70%);
+            border-radius: 50%;
+            animation: poison 2s infinite;
+            z-index: 7;
+        }
+        
+        @keyframes poison {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        
+        .cooldown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .info-section {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .info-section > div {
+                flex: 1;
+                min-width: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .status-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .player-status {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .turn-indicator {
+                margin: 10px 0;
+                padding: 10px 20px;
+                font-size: 1.2rem;
+            }
+            
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-actions {
+                flex-direction: column;
+            }
+            
+            .attack-options {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="game-section">
+            <div class="header">
+                <h1>RPG Hra s Lukostreleckými Útokmi</h1>
+                <p class="subtitle">Vyber si typ útoku a strategicky útoč na súpera!</p>
+            </div>
+            
+            <div class="game-container">
+                <div id="game-board">
+                    <div class="announcement-container">
+                        <div id="announcement" class="announcement">Začínajúci hráč: Hráč 1!</div>
+                    </div>
+                    
+                    <div id="player1" class="player">1</div>
+                    <div id="player2" class="player">2</div>
+                    
+                    <!-- Range indicators -->
+                    <div id="move-range" class="range-indicator move-range"></div>
+                    <div id="attack-range" class="range-indicator attack-range"></div>
+                    
+                    <div id="game-over" class="game-over">
+                        <div id="winner-text">Hráč 1 Vyhral!</div>
+                        <button class="restart-btn" onclick="restartGame()">Hrať Znova</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div class="player-status player1-status">
+                    <div class="player-name">Hráč 1 (Ofenzíva)</div>
+                    <div>HP: <span id="hp1">100</span></div>
+                    <div class="hp-bar">
+                        <div id="hp-fill1" class="hp-fill" style="width: 100%"></div>
+                    </div>
+                    <div id="player1-effects" style="margin-top: 10px; font-size: 0.9rem;"></div>
+                </div>
+                
+                <div class="turn-indicator" id="turn-indicator">
+                    <div>Na ťahu je: Hráč 1</div>
+                    <div class="time-left" id="time-left">30s</div>
+                </div>
+                
+                <div class="player-status player2-status">
+                    <div class="player-name">Hráč 2 (Defenzíva)</div>
+                    <div>HP: <span id="hp2">100</span></div>
+                    <div class="hp-bar">
+                        <div id="hp-fill2" class="hp-fill" style="width: 100%"></div>
+                    </div>
+                    <div id="player2-effects" style="margin-top: 10px; font-size: 0.9rem;"></div>
+                </div>
+            </div>
+            
+            <!-- Lukostrelecké útoky -->
+            <div class="attack-options" id="attack-options">
+                <div class="attack-option" data-attack="normal" onclick="selectAttack('normal')">
+                    <div class="attack-icon">🏹</div>
+                    <div>Normálny útok</div>
+                    <div>(15-25 dmg)</div>
+                </div>
+                <div class="attack-option" data-attack="fire" onclick="selectAttack('fire')">
+                    <div class="attack-icon">🔥</div>
+                    <div>Ohnivý útok</div>
+                    <div>(10-20 dmg + popálenie)</div>
+                </div>
+                <div class="attack-option" data-attack="ice" onclick="selectAttack('ice')">
+                    <div class="attack-icon">❄️</div>
+                    <div>Ľadový útok</div>
+                    <div>(5-15 dmg + spomalenie)</div>
+                </div>
+                <div class="attack-option" data-attack="poison" onclick="selectAttack('poison')">
+                    <div class="attack-icon">☠️</div>
+                    <div>Jedovatý útok</div>
+                    <div>(5-10 dmg + otrava)</div>
+                </div>
+                <div class="attack-option" data-attack="piercing" onclick="selectAttack('piercing')">
+                    <div class="attack-icon">💥</div>
+                    <div>Priepasťný útok</div>
+                    <div>(20-30 dmg)</div>
+                </div>
+            </div>
+            
+            <div class="combat-log" id="combat-log">
+                <div class="log-entry info-log">Vitajte v RPG hre s lukostreleckými útokmi!</div>
+                <div class="log-entry info-log">Hráč 1 začína hru (30s na ťah)</div>
+                <div class="log-entry info-log">Vyberte typ útoku a kliknite na hernú plochu</div>
+            </div>
+            
+            <div class="player-actions">
+                <div class="action-btn" onclick="skipTurn()">Preskočiť ťah</div>
+                <div class="action-btn" onclick="showHelp()">Zobraziť pomoc</div>
+                <div class="action-btn" onclick="toggleSound()">Vypnúť/Zapnúť zvuk</div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-card">
+                <h2>Pravidlá Hry</h2>
+                <ul class="rules-list">
+                    <li>Každý hráč má <strong>30 sekúnd</strong> na vykonanie ťahu</li>
+                    <li>Po uplynutí času sa ťah automaticky preskočí</li>
+                    <li>Kliknite na hernú plochu pre pohyb postavy</li>
+                    <li>Zelený kruh ukazuje dosah pohybu (250px)</li>
+                    <li>Červený kruh ukazuje dosah útoku (300px)</li>
+                    <li>Vyberte typ lukostreleckého útoku pred pohybom</li>
+                    <li>Cieľom hry je znížiť životy súpera na nulu</li>
+                </ul>
+                
+                <div class="sound-controls">
+                    <button id="sound-toggle" class="sound-btn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.1" value="0.5">
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h2>Lukostrelecké Útoky</h2>
+                <div class="items-grid">
+                    <div class="item-card heal-item-card">
+                        <div class="item-icon heal-item">
+                            🏹
+                        </div>
+                        <div class="item-info">
+                            <h3>Normálny útok</h3>
+                            <p>15-25 poškodenia</p>
+                            <p>Bez špeciálneho efektu</p>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card damage-item-card">
+                        <div class="item-icon damage-item">
+                            🔥
+                        </div>
+                        <div class="item-info">
+                            <h3>Ohnivý útok</h3>
+                            <p>10-20 poškodenia</p>
+                            <p>+ Popálenie (5 dmg na 3 ťahy)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card boost-item-card">
+                        <div class="item-icon boost-item">
+                            ❄️
+                        </div>
+                        <div class="item-info">
+                            <h3>Ľadový útok</h3>
+                            <p>5-15 poškodenia</p>
+                            <p>+ Spomalenie pohybu o 50% na 2 ťahy</p>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card shield-item-card">
+                        <div class="item-icon shield-item">
+                            ☠️
+                        </div>
+                        <div class="item-info">
+                            <h3>Jedovatý útok</h3>
+                            <p>5-10 poškodenia</p>
+                            <p>+ Otrava (3 dmg na 4 ťahy)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card time-item-card">
+                        <div class="item-icon time-item">
+                            💥
+                        </div>
+                        <div class="item-info">
+                            <h3>Priepasťný útok</h3>
+                            <p>20-30 poškodenia</p>
+                            <p>Ignoruje 50% obrany súpera</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h2>Stratégia a Tipy</h2>
+                <ul class="rules-list">
+                    <li>Plánujte pohyb včas - čas letí!</li>
+                    <li>Kombinujte typy útokov pre maximálny efekt</li>
+                    <li>Ohnivý útok je efektívny proti vysokým HP</li>
+                    <li>Ľadový útok znižuje mobilitu súpera</li>
+                    <li>Jedovatý útok je vhodný na dlhodobé poškodenie</li>
+                    <li>Priepasťný útok je silný proti obrneným súperom</li>
+                    <li>Hýbajte sa efektívne - využívajte zobrazený dosah</li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h2>Ovládanie</h2>
+                <ul class="rules-list">
+                    <li><strong>Ľavé kliknutie</strong> - Pohyb postavy</li>
+                    <li><strong>Zelený kruh</strong> - Dosah pohybu (250px)</li>
+                    <li><strong>Červený kruh</strong> - Dosah útoku (300px)</li>
+                    <li><strong>Výber útoku</strong> - Kliknite na typ útoku pred pohybom</li>
+                    <li><strong>Preskočiť ťah</strong> - Ak sa nemôžete rozhodnúť</li>
+                    <li><strong>Vypnúť/Zapnúť zvuk</strong> - Podľa vašich preferencií</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stav hry
+        const gameState = {
+            currentPlayer: 1,
+            player1HP: 100,
+            player2HP: 100,
+            gameOver: false,
+            player1Position: { x: 150, y: 200 },
+            player2Position: { x: 600, y: 200 },
+            player1Effects: [],
+            player2Effects: [],
+            items: [],
+            turnCounter: 1,
+            soundEnabled: true,
+            volume: 0.5,
+            timeLeft: 30,
+            moveRange: 250,
+            attackRange: 300, // Zvýšený dosah pre lukostrelecké útoky
+            timer: null,
+            selectedAttack: 'normal',
+            cooldowns: {
+                player1: { fire: 0, ice: 0, poison: 0, piercing: 0 },
+                player2: { fire: 0, ice: 0, poison: 0, piercing: 0 }
+            }
+        };
+        
+        // Definícia útokov
+        const ATTACKS = {
+            normal: {
+                name: "Normálny útok",
+                icon: "🏹",
+                damage: [15, 25],
+                effect: null,
+                cooldown: 0,
+                color: "#ff9900",
+                class: ""
+            },
+            fire: {
+                name: "Ohnivý útok",
+                icon: "🔥",
+                damage: [10, 20],
+                effect: { 
+                    type: 'burn', 
+                    duration: 3, 
+                    damagePerTurn: 5,
+                    description: 'Popálenie (5 dmg/turn)'
+                },
+                cooldown: 3,
+                color: "#ff3300",
+                class: "fire-arrow"
+            },
+            ice: {
+                name: "Ľadový útok",
+                icon: "❄️",
+                damage: [5, 15],
+                effect: { 
+                    type: 'slow', 
+                    duration: 2, 
+                    moveRangeReduction: 0.5,
+                    description: 'Spomalenie (50%)'
+                },
+                cooldown: 4,
+                color: "#66ccff",
+                class: "ice-arrow"
+            },
+            poison: {
+                name: "Jedovatý útok",
+                icon: "☠️",
+                damage: [5, 10],
+                effect: { 
+                    type: 'poison', 
+                    duration: 4, 
+                    damagePerTurn: 3,
+                    description: 'Otrava (3 dmg/turn)'
+                },
+                cooldown: 5,
+                color: "#99ff33",
+                class: "poison-arrow"
+            },
+            piercing: {
+                name: "Priepasťný útok",
+                icon: "💥",
+                damage: [20, 30],
+                effect: { 
+                    type: 'pierce', 
+                    piercePercent: 0.5,
+                    description: 'Priepasťný úder'
+                },
+                cooldown: 3,
+                color: "#cccccc",
+                class: "piercing-arrow"
+            }
+        };
+        
+        // DOM elementy
+        const gameBoard = document.getElementById('game-board');
+        const player1 = document.getElementById('player1');
+        const player2 = document.getElementById('player2');
+        const turnIndicator = document.getElementById('turn-indicator');
+        const hp1Element = document.getElementById('hp1');
+        const hp2Element = document.getElementById('hp2');
+        const hpFill1 = document.getElementById('hp-fill1');
+        const hpFill2 = document.getElementById('hp-fill2');
+        const gameOverScreen = document.getElementById('game-over');
+        const winnerText = document.getElementById('winner-text');
+        const announcement = document.getElementById('announcement');
+        const combatLog = document.getElementById('combat-log');
+        const player1Effects = document.getElementById('player1-effects');
+        const player2Effects = document.getElementById('player2-effects');
+        const soundToggle = document.getElementById('sound-toggle');
+        const volumeSlider = document.getElementById('volume-slider');
+        const timeLeftElement = document.getElementById('time-left');
+        const moveRangeIndicator = document.getElementById('move-range');
+        const attackRangeIndicator = document.getElementById('attack-range');
+        const attackOptions = document.getElementById('attack-options');
+        
+        // Počiatočné nastavenie
+        updateHPBars();
+        showAnnouncement("Začínajúci hráč: Hráč 1!");
+        generateItems();
+        startTurnTimer();
+        updateRangeIndicators();
+        updateCooldowns();
+        
+        // Nastavenie zvuku
+        soundToggle.addEventListener('click', () => {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            soundToggle.innerHTML = gameState.soundEnabled 
+                ? '<i class="fas fa-volume-up"></i>' 
+                : '<i class="fas fa-volume-mute"></i>';
+            addCombatLog(`Zvuky boli ${gameState.soundEnabled ? 'zapnuté' : 'vypnuté'}`, 'info-log');
+        });
+        
+        volumeSlider.addEventListener('input', (e) => {
+            gameState.volume = parseFloat(e.target.value);
+        });
+        
+        // Výber útoku
+        function selectAttack(type) {
+            // Skontrolovať cooldown
+            const cooldownKey = `player${gameState.currentPlayer}`;
+            if (gameState.cooldowns[cooldownKey][type] > 0) {
+                addCombatLog(`Tento útok je ešte na cooldowne! Zostávajúce kola: ${gameState.cooldowns[cooldownKey][type]}`, 'damage-log');
+                return;
+            }
+            
+            gameState.selectedAttack = type;
+            
+            // Zvýrazniť vybraný útok
+            document.querySelectorAll('.attack-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`.attack-option[data-attack="${type}"]`).classList.add('selected');
+            
+            addCombatLog(`Hráč ${gameState.currentPlayer} vybral útok: ${ATTACKS[type].name}`, 'info-log');
+        }
+        
+        // Event listener pre pohyb postáv
+        gameBoard.addEventListener('click', function(event) {
+            if (gameState.gameOver) return;
+            
+            // Skontrolovať či hráč nie je zamrznutý
+            const isPlayerFrozen = gameState.currentPlayer === 1 
+                ? gameState.player1Effects.some(e => e.type === 'TRAP')
+                : gameState.player2Effects.some(e => e.type === 'TRAP');
+            
+            if (isPlayerFrozen) {
+                addCombatLog(`Hráč ${gameState.currentPlayer} je zamrznutý a nemôže sa hýbať!`, 'damage-log');
+                endTurn();
+                return;
+            }
+            
+            const rect = gameBoard.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const playerX = gameState.currentPlayer === 1 ? gameState.player1Position.x : gameState.player2Position.x;
+            const playerY = gameState.currentPlayer === 1 ? gameState.player1Position.y : gameState.player2Position.y;
+            
+            // Skontrolovať vzdialenosť pohybu
+            const distance = Math.sqrt(Math.pow(x - (playerX + 35), 2) + Math.pow(y - (playerY + 35), 2));
+            if (distance > gameState.moveRange) {
+                addCombatLog(`Nemôžete sa pohnúť tak ďaleko! Maximálny dosah je ${gameState.moveRange}px.`, 'damage-log');
+                return;
+            }
+            
+            // Prehraj zvuk pohybu
+            if (gameState.soundEnabled) playSoundEffect('move');
+            
+            // Pohyb aktuálneho hráča
+            if (gameState.currentPlayer === 1) {
+                gameState.player1Position = { x: x - 35, y: y - 35 };
+                player1.style.left = `${gameState.player1Position.x}px`;
+                player1.style.top = `${gameState.player1Position.y}px`;
+                
+                // 20% šanca na liečenie pri pohybe
+                if (Math.random() < 0.2 && gameState.player1HP < 100) {
+                    const healAmount = Math.floor(Math.random() * 10) + 5;
+                    gameState.player1HP = Math.min(100, gameState.player1HP + healAmount);
+                    updateHPBars();
+                    showSpecialEffect(player1, `+${healAmount} HP`, '#33ff77');
+                    addCombatLog(`Hráč 1 sa lieči za ${healAmount} HP`, 'heal-log');
+                    if (gameState.soundEnabled) playSoundEffect('heal');
+                }
+            } else {
+                gameState.player2Position = { x: x - 35, y: y - 35 };
+                player2.style.left = `${gameState.player2Position.x}px`;
+                player2.style.top = `${gameState.player2Position.y}px`;
+                
+                // 20% šanca na liečenie pri pohybe
+                if (Math.random() < 0.2 && gameState.player2HP < 100) {
+                    const healAmount = Math.floor(Math.random() * 10) + 5;
+                    gameState.player2HP = Math.min(100, gameState.player2HP + healAmount);
+                    updateHPBars();
+                    showSpecialEffect(player2, `+${healAmount} HP`, '#33ff77');
+                    addCombatLog(`Hráč 2 sa lieči za ${healAmount} HP`, 'heal-log');
+                    if (gameState.soundEnabled) playSoundEffect('heal');
+                }
+            }
+            
+            // Skontrolovať zber predmetov
+            checkItemCollection();
+            
+            // Skontrolovať útok na súpera
+            checkForAttack();
+        });
+        
+        // Funkcia na spustenie časovača ťahu
+        function startTurnTimer() {
+            clearInterval(gameState.timer);
+            gameState.timeLeft = 30;
+            updateTimeDisplay();
+            
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimeDisplay();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    addCombatLog(`Čas vypršal! Hráč ${gameState.currentPlayer} preskočil ťah.`, 'damage-log');
+                    endTurn();
+                }
+            }, 1000);
+        }
+        
+        // Funkcia na aktualizáciu zobrazenia času
+        function updateTimeDisplay() {
+            timeLeftElement.textContent = `${gameState.timeLeft}s`;
+            
+            // Zmena farby podľa zostávajúceho času
+            if (gameState.timeLeft <= 10) {
+                timeLeftElement.style.color = '#ff6666';
+                timeLeftElement.style.animation = 'pulse 0.5s infinite';
+            } else if (gameState.timeLeft <= 20) {
+                timeLeftElement.style.color = '#ffcc00';
+                timeLeftElement.style.animation = 'none';
+            } else {
+                timeLeftElement.style.color = '#ffffff';
+                timeLeftElement.style.animation = 'none';
+            }
+        }
+        
+        // Funkcia na aktualizáciu indikátorov dosahu
+        function updateRangeIndicators() {
+            // Dosah pohybu
+            moveRangeIndicator.style.width = `${gameState.moveRange * 2}px`;
+            moveRangeIndicator.style.height = `${gameState.moveRange * 2}px`;
+            
+            // Dosah útoku
+            attackRangeIndicator.style.width = `${gameState.attackRange * 2}px`;
+            attackRangeIndicator.style.height = `${gameState.attackRange * 2}px`;
+            
+            // Zobraziť podľa aktuálneho hráča
+            if (gameState.currentPlayer === 1) {
+                moveRangeIndicator.style.left = `${gameState.player1Position.x + 35 - gameState.moveRange}px`;
+                moveRangeIndicator.style.top = `${gameState.player1Position.y + 35 - gameState.moveRange}px`;
+                moveRangeIndicator.style.display = 'block';
+                
+                attackRangeIndicator.style.left = `${gameState.player2Position.x + 35 - gameState.attackRange}px`;
+                attackRangeIndicator.style.top = `${gameState.player2Position.y + 35 - gameState.attackRange}px`;
+                attackRangeIndicator.style.display = 'block';
+            } else {
+                moveRangeIndicator.style.left = `${gameState.player2Position.x + 35 - gameState.moveRange}px`;
+                moveRangeIndicator.style.top = `${gameState.player2Position.y + 35 - gameState.moveRange}px`;
+                moveRangeIndicator.style.display = 'block';
+                
+                attackRangeIndicator.style.left = `${gameState.player1Position.x + 35 - gameState.attackRange}px`;
+                attackRangeIndicator.style.top = `${gameState.player1Position.y + 35 - gameState.attackRange}px`;
+                attackRangeIndicator.style.display = 'block';
+            }
+        }
+        
+        // Funkcia na ukončenie ťahu
+        function endTurn() {
+            // Aktualizovať cooldowny
+            updateCooldowns();
+            
+            // Zmeniť hráča
+            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+            turnIndicator.innerHTML = `<div>Na ťahu je: Hráč ${gameState.currentPlayer}</div>`;
+            addCombatLog(`Na ťahu je Hráč ${gameState.currentPlayer}`, 'info-log');
+            
+            // Resetovať výber útoku
+            gameState.selectedAttack = 'normal';
+            document.querySelectorAll('.attack-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector('.attack-option[data-attack="normal"]').classList.add('selected');
+            
+            // Aktualizovať efekty
+            updateEffects();
+            
+            // Zvýšiť počítadlo ťahov
+            gameState.turnCounter++;
+            
+            // Pridávať nové predmety každé 2 ťahy
+            if (gameState.turnCounter % 2 === 0) {
+                generateItems();
+            }
+            
+            // Spustiť časovač pre nový ťah
+            startTurnTimer();
+            
+            // Aktualizovať indikátory dosahu
+            updateRangeIndicators();
+        }
+        
+        // Funkcia na kontrolu zberu predmetov
+        function checkItemCollection() {
+            const player = gameState.currentPlayer === 1 ? gameState.player1Position : gameState.player2Position;
+            
+            for (let i = gameState.items.length - 1; i >= 0; i--) {
+                const item = gameState.items[i];
+                const dx = player.x - item.x;
+                const dy = player.y - item.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 60) { // Zber predmetu
+                    item.type.effect(gameState.currentPlayer);
+                    
+                    // Odstrániť predmet z DOM
+                    if (item.element && item.element.parentNode) {
+                        item.element.parentNode.removeChild(item.element);
+                    }
+                    
+                    // Odstrániť predmet zo zoznamu
+                    gameState.items.splice(i, 1);
+                }
+            }
+        }
+        
+        // Funkcia na kontrolu útoku na súpera
+        function checkForAttack() {
+            const dx = gameState.player1Position.x - gameState.player2Position.x;
+            const dy = gameState.player1Position.y - gameState.player2Position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Ak sú postavy v dosahu útoku
+            if (distance < gameState.attackRange) {
+                // Vykonať útok
+                performAttack();
+            } else {
+                addCombatLog(`Súper je mimo dosahu útoku (${Math.round(distance)}px > ${gameState.attackRange}px)`, 'info-log');
+            }
+            
+            // Ukončiť ťah
+            endTurn();
+        }
+        
+        // Funkcia na vykonanie útoku
+        function performAttack() {
+            const attackType = ATTACKS[gameState.selectedAttack];
+            const attacker = gameState.currentPlayer;
+            const defender = gameState.currentPlayer === 1 ? 2 : 1;
+            
+            // Vytvoriť šíp
+            createArrow(attacker, defender, attackType);
+            
+            // Po krátkom čase spracovať útok
+            setTimeout(() => {
+                let damage = Math.floor(Math.random() * (attackType.damage[1] - attackType.damage[0] + 1)) + attackType.damage[0];
+                let isCritical = false;
+                
+                // 15% šanca na kritický útok
+                if (Math.random() < 0.15) {
+                    damage = Math.floor(damage * 1.8);
+                    isCritical = true;
+                }
+                
+                // Aplikovať efekty útočníka
+                if (attacker === 1) {
+                    // Zvýšiť damage ak má útočník boost
+                    const attackBoost = gameState.player1Effects.filter(e => e.type === 'ATTACK_BOOST').length;
+                    if (attackBoost) {
+                        damage = Math.floor(damage * (1 + (attackBoost > 1 ? 0.5 : 0.1)));
+                    }
+                    
+                    // Znížiť damage ak má obranca boost
+                    const defenseBoost = gameState.player2Effects.filter(e => e.type === 'DEFENSE_BOOST').length;
+                    if (defenseBoost) {
+                        damage = Math.floor(damage * (1 - (defenseBoost > 1 ? 0.5 : 0.1)));
+                    }
+                    
+                    // Priepasťný útok ignoruje 50% obrany
+                    if (attackType.effect && attackType.effect.type === 'pierce') {
+                        const defenseReduction = Math.floor(damage * attackType.effect.piercePercent);
+                        damage += defenseReduction;
+                    }
+                    
+                    gameState.player2HP = Math.max(0, gameState.player2HP - damage);
+                    
+                    // Oznámenie o útoku
+                    if (isCritical) {
+                        showAnnouncement(`HRÁČ 1 KRITICKÝ ÚTOK! Spôsobil ${damage} škody!`, 'critical-hit');
+                        addCombatLog(`Hráč 1 kriticky útočí za ${damage} škody!`, 'critical-log');
+                    } else {
+                        showAnnouncement(`Hráč 1 útočí na Hráča 2 a spôsobil ${damage} škody!`);
+                        addCombatLog(`Hráč 1 útočí ${attackType.name.toLowerCase()} za ${damage} škody`, 'damage-log');
+                    }
+                    
+                    showSpecialEffect(player2, `-${damage} HP`, '#ff6666');
+                    
+                    // Pridať špeciálny efekt
+                    if (attackType.effect) {
+                        const effect = { ...attackType.effect };
+                        gameState.player2Effects.push(effect);
+                        addCombatLog(`Hráč 2 je ovplyvnený: ${effect.description}`, 'item-log');
+                        
+                        // Vizualizácia efektu
+                        createEffect(defender, attackType);
+                    }
+                } else {
+                    // Zvýšiť damage ak má útočník boost
+                    const attackBoost = gameState.player2Effects.filter(e => e.type === 'ATTACK_BOOST').length;
+                    if (attackBoost) {
+                        damage = Math.floor(damage * (1 + (attackBoost > 1 ? 0.5 : 0.1)));
+                    }
+                    
+                    // Znížiť damage ak má obranca boost
+                    const defenseBoost = gameState.player1Effects.filter(e => e.type === 'DEFENSE_BOOST').length;
+                    if (defenseBoost) {
+                        damage = Math.floor(damage * (1 - (defenseBoost > 1 ? 0.5 : 0.1)));
+                    }
+                    
+                    // Priepasťný útok ignoruje 50% obrany
+                    if (attackType.effect && attackType.effect.type === 'pierce') {
+                        const defenseReduction = Math.floor(damage * attackType.effect.piercePercent);
+                        damage += defenseReduction;
+                    }
+                    
+                    gameState.player1HP = Math.max(0, gameState.player1HP - damage);
+                    
+                    // Oznámenie o útoku
+                    if (isCritical) {
+                        showAnnouncement(`HRÁČ 2 KRITICKÝ ÚTOK! Spôsobil ${damage} škody!`, 'critical-hit');
+                        addCombatLog(`Hráč 2 kriticky útočí za ${damage} škody!`, 'critical-log');
+                    } else {
+                        showAnnouncement(`Hráč 2 útočí na Hráča 1 a spôsobil ${damage} škody!`);
+                        addCombatLog(`Hráč 2 útočí ${attackType.name.toLowerCase()} za ${damage} škody`, 'damage-log');
+                    }
+                    
+                    showSpecialEffect(player1, `-${damage} HP`, '#ff6666');
+                    
+                    // Pridať špeciálny efekt
+                    if (attackType.effect) {
+                        const effect = { ...attackType.effect };
+                        gameState.player1Effects.push(effect);
+                        addCombatLog(`Hráč 1 je ovplyvnený: ${effect.description}`, 'item-log');
+                        
+                        // Vizualizácia efektu
+                        createEffect(defender, attackType);
+                    }
+                }
+                
+                // Nastaviť cooldown
+                if (attackType.cooldown > 0) {
+                    const cooldownKey = `player${attacker}`;
+                    gameState.cooldowns[cooldownKey][gameState.selectedAttack] = attackType.cooldown;
+                    updateCooldowns();
+                }
+                
+                updateHPBars();
+                
+                // Prehrať zvuk útoku
+                if (gameState.soundEnabled) {
+                    if (isCritical) {
+                        playSoundEffect('critical');
+                    } else {
+                        playSoundEffect('attack');
+                    }
+                }
+                
+                // Skontrolovať koniec hry
+                if (gameState.player1HP <= 0 || gameState.player2HP <= 0) {
+                    endGame();
+                }
+            }, 500);
+        }
+        
+        // Funkcia na vytvorenie šípu
+        function createArrow(attacker, defender, attackType) {
+            const attackerPos = attacker === 1 ? gameState.player1Position : gameState.player2Position;
+            const defenderPos = defender === 1 ? gameState.player1Position : gameState.player2Position;
+            
+            const arrow = document.createElement('div');
+            arrow.className = `arrow ${attackType.class}`;
+            
+            // Pozícia
+            const startX = attackerPos.x + 35;
+            const startY = attackerPos.y + 35;
+            const endX = defenderPos.x + 35;
+            const endY = defenderPos.y + 35;
+            
+            arrow.style.left = `${startX}px`;
+            arrow.style.top = `${startY}px`;
+            
+            // Dĺžka a uhol
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            arrow.style.width = `${distance}px`;
+            arrow.style.transform = `rotate(${angle}deg)`;
+            
+            gameBoard.appendChild(arrow);
+            
+            // Animovať šíp
+            setTimeout(() => {
+                arrow.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+                arrow.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
+                arrow.style.opacity = '0';
+                
+                // Odstrániť šíp po animácii
+                setTimeout(() => {
+                    if (arrow.parentNode) {
+                        arrow.parentNode.removeChild(arrow);
+                    }
+                }, 500);
+            }, 10);
+        }
+        
+        // Funkcia na vytvorenie efektu útoku
+        function createEffect(player, attackType) {
+            const playerElement = player === 1 ? player1 : player2;
+            const effect = document.createElement('div');
+            
+            if (attackType.name === "Ohnivý útok") {
+                effect.className = 'fire-effect';
+            } else if (attackType.name === "Ľadový útok") {
+                effect.className = 'ice-effect';
+            } else if (attackType.name === "Jedovatý útok") {
+                effect.className = 'poison-effect';
+            }
+            
+            if (effect.className) {
+                effect.style.left = `${parseInt(playerElement.style.left) - 15}px`;
+                effect.style.top = `${parseInt(playerElement.style.top) - 15}px`;
+                gameBoard.appendChild(effect);
+                
+                // Odstrániť efekt po čase
+                setTimeout(() => {
+                    if (effect.parentNode) {
+                        effect.parentNode.removeChild(effect);
+                    }
+                }, 2000);
+            }
+        }
+        
+        // Funkcia na zobrazenie oznámenia
+        function showAnnouncement(message, className = '') {
+            announcement.textContent = message;
+            announcement.className = 'announcement';
+            if (className) announcement.classList.add(className);
+            announcement.classList.add('show');
+            
+            setTimeout(() => {
+                announcement.classList.remove('show');
+                setTimeout(() => {
+                    announcement.className = 'announcement';
+                }, 500);
+            }, 3000);
+        }
+        
+        // Funkcia na pridanie správy do combat logu
+        function addCombatLog(message, className = '') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${className}`;
+            logEntry.textContent = message;
+            combatLog.appendChild(logEntry);
+            
+            // Scroll na dolnú časť logu
+            combatLog.scrollTop = combatLog.scrollHeight;
+            
+            // Odstrániť najstaršie správy ak je ich príliš veľa
+            if (combatLog.children.length > 8) {
+                combatLog.removeChild(combatLog.firstChild);
+            }
+        }
+        
+        // Funkcia na zobrazenie špeciálneho efektu (poškodenie, liečenie)
+        function showSpecialEffect(element, text, color) {
+            const effect = document.createElement('div');
+            effect.className = 'special-effect';
+            effect.textContent = text;
+            effect.style.color = color;
+            effect.style.left = `${parseInt(element.style.left) + 35}px`;
+            effect.style.top = `${parseInt(element.style.top) - 10}px`;
+            gameBoard.appendChild(effect);
+            
+            // Odstrániť efekt po animácii
+            setTimeout(() => {
+                effect.remove();
+            }, 2000);
+        }
+        
+        // Funkcia na aktualizáciu HP panelov
+        function updateHPBars() {
+            hp1Element.textContent = gameState.player1HP;
+            hp2Element.textContent = gameState.player2HP;
+            hpFill1.style.width = `${gameState.player1HP}%`;
+            hpFill2.style.width = `${gameState.player2HP}%`;
+        }
+        
+        // Funkcia na ukončenie hry
+        function endGame() {
+            gameState.gameOver = true;
+            clearInterval(gameState.timer);
+            if (gameState.player1HP <= 0) {
+                winnerText.textContent = "Hráč 2 Vyhral!";
+                showAnnouncement("HRÁČ 2 VYHRÁVA!", "heal");
+            } else {
+                winnerText.textContent = "Hráč 1 Vyhral!";
+                showAnnouncement("HRÁČ 1 VYHRÁVA!", "heal");
+            }
+            gameOverScreen.style.display = "flex";
+            
+            // Prehrať víťazný zvuk
+            if (gameState.soundEnabled) playSoundEffect('win');
+        }
+        
+        // Funkcia na generovanie predmetov
+        function generateItems() {
+            // Odstrániť staré predmety
+            document.querySelectorAll('.item').forEach(item => item.remove());
+            gameState.items = [];
+            
+            // Počet predmetov na generovanie (2-4)
+            const itemCount = Math.floor(Math.random() * 3) + 2;
+            
+            for (let i = 0; i < itemCount; i++) {
+                // Náhodný typ predmetu
+                const itemKeys = Object.keys(ITEM_TYPES);
+                const randomKey = itemKeys[Math.floor(Math.random() * itemKeys.length)];
+                const itemType = ITEM_TYPES[randomKey];
+                
+                // Náhodná pozícia (vyhnúť sa hráčom)
+                let x, y;
+                let validPosition = false;
+                
+                while (!validPosition) {
+                    x = Math.floor(Math.random() * (gameBoard.offsetWidth - 60));
+                    y = Math.floor(Math.random() * (gameBoard.offsetHeight - 60));
+                    
+                    // Skontrolovať vzdialenosť od hráčov
+                    const distToPlayer1 = Math.sqrt(
+                        Math.pow(x - gameState.player1Position.x, 2) + 
+                        Math.pow(y - gameState.player1Position.y, 2)
+                    );
+                    
+                    const distToPlayer2 = Math.sqrt(
+                        Math.pow(x - gameState.player2Position.x, 2) + 
+                        Math.pow(y - gameState.player2Position.y, 2)
+                    );
+                    
+                    if (distToPlayer1 > 100 && distToPlayer2 > 100) {
+                        validPosition = true;
+                    }
+                }
+                
+                // Vytvoriť DOM element pre predmet
+                const itemElement = document.createElement('div');
+                itemElement.className = `item ${itemType.class}`;
+                itemElement.style.left = `${x}px`;
+                itemElement.style.top = `${y}px`;
+                itemElement.innerHTML = `<i class="${itemType.icon}"></i>`;
+                
+                gameBoard.appendChild(itemElement);
+                
+                // Uložiť do stavu hry
+                gameState.items.push({
+                    type: itemType,
+                    x: x,
+                    y: y,
+                    element: itemElement
+                });
+            }
+            
+            addCombatLog(`Na hernej ploche sa objavili nové predmety!`, 'info-log');
+        }
+        
+        // Funkcia na aktualizáciu efektov hráčov
+        function updateEffects() {
+            // Aktualizovať efekty hráča 1
+            for (let i = gameState.player1Effects.length - 1; i >= 0; i--) {
+                const effect = gameState.player1Effects[i];
+                
+                // Aplikovať poškodenie z efektov
+                if (effect.type === 'burn' || effect.type === 'poison') {
+                    gameState.player1HP = Math.max(0, gameState.player1HP - effect.damagePerTurn);
+                    showSpecialEffect(player1, `-${effect.damagePerTurn} HP`, '#ff6666');
+                    addCombatLog(`Hráč 1 utrpel ${effect.damagePerTurn} poškodenia od ${effect.type === 'burn' ? 'popálenia' : 'otravy'}`, 'damage-log');
+                }
+                
+                // Znížiť trvanie efektu
+                effect.duration--;
+                if (effect.duration <= 0) {
+                    gameState.player1Effects.splice(i, 1);
+                    addCombatLog(`Efekt ${effect.description} u Hráča 1 vypršal`, 'info-log');
+                }
+            }
+            
+            // Aktualizovať efekty hráča 2
+            for (let i = gameState.player2Effects.length - 1; i >= 0; i--) {
+                const effect = gameState.player2Effects[i];
+                
+                // Aplikovať poškodenie z efektov
+                if (effect.type === 'burn' || effect.type === 'poison') {
+                    gameState.player2HP = Math.max(0, gameState.player2HP - effect.damagePerTurn);
+                    showSpecialEffect(player2, `-${effect.damagePerTurn} HP`, '#ff6666');
+                    addCombatLog(`Hráč 2 utrpel ${effect.damagePerTurn} poškodenia od ${effect.type === 'burn' ? 'popálenia' : 'otravy'}`, 'damage-log');
+                }
+                
+                // Znížiť trvanie efektu
+                effect.duration--;
+                if (effect.duration <= 0) {
+                    gameState.player2Effects.splice(i, 1);
+                    addCombatLog(`Efekt ${effect.description} u Hráča 2 vypršal`, 'info-log');
+                }
+            }
+            
+            updateHPBars();
+            updatePlayerEffects();
+            
+            // Skontrolovať koniec hry
+            if (gameState.player1HP <= 0 || gameState.player2HP <= 0) {
+                endGame();
+            }
+        }
+        
+        // Funkcia na zobrazenie efektov hráčov
+        function updatePlayerEffects() {
+            player1Effects.innerHTML = gameState.player1Effects
+                .map(e => `<div>${e.description} (${e.duration} ťah${e.duration > 1 ? 'y' : ''})</div>`)
+                .join('');
+                
+            player2Effects.innerHTML = gameState.player2Effects
+                .map(e => `<div>${e.description} (${e.duration} ťah${e.duration > 1 ? 'y' : ''})</div>`)
+                .join('');
+        }
+        
+        // Funkcia na aktualizáciu cooldownov
+        function updateCooldowns() {
+            const player = `player${gameState.currentPlayer}`;
+            const cooldowns = gameState.cooldowns[player];
+            
+            // Aktualizovať zobrazenie
+            document.querySelectorAll('.attack-option').forEach(option => {
+                const attackType = option.dataset.attack;
+                if (attackType !== 'normal') {
+                    const cooldown = cooldowns[attackType];
+                    
+                    // Odstrániť staré cooldown overlay
+                    const existingOverlay = option.querySelector('.cooldown-overlay');
+                    if (existingOverlay) {
+                        existingOverlay.remove();
+                    }
+                    
+                    // Pridať nový cooldown overlay ak je potrebné
+                    if (cooldown > 0) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'cooldown-overlay';
+                        overlay.textContent = cooldown;
+                        option.appendChild(overlay);
+                        option.classList.add('disabled');
+                    } else {
+                        option.classList.remove('disabled');
+                    }
+                }
+            });
+        }
+        
+        // Funkcia na reštartovanie hry
+        function restartGame() {
+            clearInterval(gameState.timer);
+            gameState.currentPlayer = 1;
+            gameState.player1HP = 100;
+            gameState.player2HP = 100;
+            gameState.gameOver = false;
+            gameState.player1Effects = [];
+            gameState.player2Effects = [];
+            gameState.items = [];
+            gameState.turnCounter = 1;
+            gameState.selectedAttack = 'normal';
+            gameState.cooldowns = {
+                player1: { fire: 0, ice: 0, poison: 0, piercing: 0 },
+                player2: { fire: 0, ice: 0, poison: 0, piercing: 0 }
+            };
+            
+            // Resetovať pozície
+            gameState.player1Position = { x: 150, y: 200 };
+            gameState.player2Position = { x: 600, y: 200 };
+            player1.style.left = "150px";
+            player1.style.top = "200px";
+            player2.style.left = "600px";
+            player2.style.top = "200px";
+            
+            // Vyčistiť combat log
+            combatLog.innerHTML = '<div class="log-entry info-log">Hra bola reštartovaná</div>';
+            
+            updateHPBars();
+            updatePlayerEffects();
+            turnIndicator.innerHTML = `<div>Na ťahu je: Hráč 1</div>`;
+            gameOverScreen.style.display = "none";
+            showAnnouncement("Hra bola reštartovaná! Hráč 1 začína.");
+            
+            // Resetovať výber útoku
+            document.querySelectorAll('.attack-option').forEach(option => {
+                option.classList.remove('selected');
+                option.classList.remove('disabled');
+                
+                // Odstrániť cooldown overlay
+                const overlay = option.querySelector('.cooldown-overlay');
+                if (overlay) overlay.remove();
+            });
+            document.querySelector('.attack-option[data-attack="normal"]').classList.add('selected');
+            
+            // Generovať nové predmety
+            generateItems();
+            
+            // Spustiť časovač
+            startTurnTimer();
+            
+            // Aktualizovať indikátory
+            updateRangeIndicators();
+        }
+        
+        // Funkcia na prehratie zvuku
+        function playSoundEffect(type) {
+            // Zjednodušená implementácia pre príklad
+            if (type === 'move') {
+                const moveSound = new Audio('https://www.soundjay.com/button/button-3.mp3');
+                moveSound.volume = gameState.volume;
+                moveSound.play();
+            } else if (type === 'attack') {
+                const attackSound = new Audio('https://www.soundjay.com/melee/sword-swing-1.mp3');
+                attackSound.volume = gameState.volume;
+                attackSound.play();
+            } else if (type === 'critical') {
+                const critSound = new Audio('https://www.soundjay.com/melee/punch-1.mp3');
+                critSound.volume = gameState.volume;
+                critSound.play();
+            } else if (type === 'heal') {
+                const healSound = new Audio('https://www.soundjay.com/misc/magic-chime-01.mp3');
+                healSound.volume = gameState.volume;
+                healSound.play();
+            } else if (type === 'win') {
+                const winSound = new Audio('https://www.soundjay.com/misc/sounds/magic-chime-02.mp3');
+                winSound.volume = gameState.volume;
+                winSound.play();
+            }
+        }
+        
+        // Funkcia na preskočenie ťahu
+        function skipTurn() {
+            addCombatLog(`Hráč ${gameState.currentPlayer} preskočil svoj ťah!`, 'info-log');
+            endTurn();
+        }
+        
+        // Funkcia na zobrazenie pomoci
+        function showHelp() {
+            addCombatLog("Pomoc: Kliknite na hernú plochu pre pohyb postavy", 'info-log');
+            showAnnouncement("Zelený kruh = pohyb (250px), Červený kruh = útok (300px)");
+        }
+        
+        // Funkcia na vypnutie/zapnutie zvuku
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            soundToggle.innerHTML = gameState.soundEnabled 
+                ? '<i class="fas fa-volume-up"></i>' 
+                : '<i class="fas fa-volume-mute"></i>';
+            addCombatLog(`Zvuky boli ${gameState.soundEnabled ? 'zapnuté' : 'vypnuté'}`, 'info-log');
+        }
+        
+        // Typy predmetov
+        const ITEM_TYPES = {
+            HEAL: { 
+                name: "Srdce", 
+                icon: "fas fa-heart", 
+                class: "heal-item",
+                effect: (player) => {
+                    const healAmount = Math.floor(Math.random() * 11) + 15; // 15-25 HP
+                    if (player === 1) {
+                        gameState.player1HP = Math.min(100, gameState.player1HP + healAmount);
+                        addCombatLog(`Hráč 1 zobral Srdce a získal ${healAmount} HP!`, 'heal-log');
+                    } else {
+                        gameState.player2HP = Math.min(100, gameState.player2HP + healAmount);
+                        addCombatLog(`Hráč 2 zobral Srdce a získal ${healAmount} HP!`, 'heal-log');
+                    }
+                    updateHPBars();
+                    if (gameState.soundEnabled) playSoundEffect('heal');
+                }
+            },
+            DAMAGE: { 
+                name: "Bomba", 
+                icon: "fas fa-bomb", 
+                class: "damage-item",
+                effect: (player) => {
+                    const damage = Math.floor(Math.random() * 11) + 15; // 15-25 HP
+                    if (player === 1) {
+                        gameState.player1HP = Math.max(0, gameState.player1HP - damage);
+                        addCombatLog(`Hráč 1 zobral Bombu a stratil ${damage} HP!`, 'damage-log');
+                    } else {
+                        gameState.player2HP = Math.max(0, gameState.player2HP - damage);
+                        addCombatLog(`Hráč 2 zobral Bombu a stratil ${damage} HP!`, 'damage-log');
+                    }
+                    updateHPBars();
+                    if (gameState.soundEnabled) playSoundEffect('attack');
+                }
+            },
+            ATTACK_BOOST: { 
+                name: "Blesk", 
+                icon: "fas fa-bolt", 
+                class: "boost-item",
+                effect: (player) => {
+                    const effect = { 
+                        type: 'ATTACK_BOOST', 
+                        duration: 2,
+                        description: '+50% k útoku'
+                    };
+                    
+                    if (player === 1) {
+                        gameState.player1Effects.push(effect);
+                        addCombatLog(`Hráč 1 zobral Blesk: +50% k útoku na 2 ťahy!`, 'item-log');
+                    } else {
+                        gameState.player2Effects.push(effect);
+                        addCombatLog(`Hráč 2 zobral Blesk: +50% k útoku na 2 ťahy!`, 'item-log');
+                    }
+                    updatePlayerEffects();
+                    if (gameState.soundEnabled) playSoundEffect('item');
+                }
+            },
+            DEFENSE_BOOST: { 
+                name: "Štít", 
+                icon: "fas fa-shield-alt", 
+                class: "shield-item",
+                effect: (player) => {
+                    const effect = { 
+                        type: 'DEFENSE_BOOST', 
+                        duration: 2,
+                        description: '-50% poškodenia'
+                    };
+                    
+                    if (player === 1) {
+                        gameState.player1Effects.push(effect);
+                        addCombatLog(`Hráč 1 zobral Štít: -50% poškodenia na 2 ťahy!`, 'item-log');
+                    } else {
+                        gameState.player2Effects.push(effect);
+                        addCombatLog(`Hráč 2 zobral Štít: -50% poškodenia na 2 ťahy!`, 'item-log');
+                    }
+                    updatePlayerEffects();
+                    if (gameState.soundEnabled) playSoundEffect('item');
+                }
+            },
+            TIME_EXTEND: { 
+                name: "Hodiny", 
+                icon: "fas fa-hourglass-half", 
+                class: "time-item",
+                effect: (player) => {
+                    gameState.timeLeft += 15;
+                    updateTimeDisplay();
+                    if (player === 1) {
+                        addCombatLog(`Hráč 1 zobral Hodiny: +15 sekúnd k času!`, 'item-log');
+                    } else {
+                        addCombatLog(`Hráč 2 zobral Hodiny: +15 sekúnd k času!`, 'item-log');
+                    }
+                    if (gameState.soundEnabled) playSoundEffect('time');
+                }
+            },
+            TRAP: { 
+                name: "Pasca", 
+                icon: "fas fa-skull", 
+                class: "trap-item",
+                effect: (player) => {
+                    const effect = { 
+                        type: 'TRAP', 
+                        duration: 1,
+                        description: 'Zamrznutý'
+                    };
+                    
+                    if (player === 1) {
+                        gameState.player1Effects.push(effect);
+                        addCombatLog(`Hráč 1 zobral Pascu: zamrznutý na 1 ťah!`, 'damage-log');
+                    } else {
+                        gameState.player2Effects.push(effect);
+                        addCombatLog(`Hráč 2 zobral Pascu: zamrznutý na 1 ťah!`, 'damage-log');
+                    }
+                    updatePlayerEffects();
+                    if (gameState.soundEnabled) playSoundEffect('trap');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
