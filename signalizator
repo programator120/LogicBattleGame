@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interferenční Signalizátor //--//</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #4cc9f0, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+        
+        .subtitle {
+            color: #a9d6e5;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        
+        .input-container {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4cc9f0;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            border: 1px solid rgba(76, 201, 240, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(90deg, #4361ee, #f72585);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+        
+        .equilibrium {
+            background: linear-gradient(135deg, rgba(0, 200, 100, 0.2), rgba(0, 150, 80, 0.1));
+            border: 1px solid rgba(0, 255, 150, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.2);
+        }
+        
+        .subabstract {
+            background: linear-gradient(135deg, rgba(120, 70, 200, 0.2), rgba(80, 50, 150, 0.1));
+            border: 1px solid rgba(160, 100, 255, 0.3);
+            box-shadow: 0 0 20px rgba(160, 100, 255, 0.2);
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .result-expression {
+            font-size: 1.2rem;
+            color: #cccccc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scale-visualization {
+            height: 100px;
+            margin: 2rem auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        
+        .scale {
+            width: 300px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            border-radius: 5px;
+        }
+        
+        .weight {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 1s ease;
+        }
+        
+        .weight-a {
+            background: linear-gradient(135deg, #4361ee, #4cc9f0);
+            left: 30%;
+        }
+        
+        .weight-b {
+            background: linear-gradient(135deg, #f72585, #b5179e);
+            left: 70%;
+        }
+        
+        .balance-point {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            transition: all 1s ease;
+        }
+        
+        .explanation {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Interferenční Signalizátor //--//</h1>
+        <p class="subtitle">Vizualizace sub-abstraktně převrácené hodnoty</p>
+    </header>
+    
+    <div class="container">
+        <div class="input-group">
+            <div class="input-container">
+                <label for="valueA">Hodnota A (hmota):</label>
+                <input type="number" id="valueA" step="any" value="2" placeholder="Zadejte hodnotu A">
+            </div>
+            
+            <div class="input-container">
+                <label for="valueB">Hodnota B (stín):</label>
+                <input type="number" id="valueB" step="any" value="0.5" placeholder="Zadejte hodnotu B">
+            </div>
+        </div>
+        
+        <button id="calculateBtn">Vypočítat //--//</button>
+        
+        <div class="scale-visualization">
+            <div class="scale"></div>
+            <div class="weight weight-a" id="weightA">A</div>
+            <div class="weight weight-b" id="weightB">B</div>
+            <div class="balance-point">⚖️</div>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-title">🪄 Zadejte hodnoty a vypočítejte</div>
+            <div class="result-expression">A //--// B = ?</div>
+            <div class="result-value">-</div>
+        </div>
+        
+        <div class="explanation">
+            <h3>Vysvětlení operátoru //--//</h3>
+            <p>Operátor <strong>A //--// B</strong> reprezentuje dvě strany vah:</p>
+            <ul>
+                <li><strong>Hmota (A)</strong> - klasická hodnota čísla</li>
+                <li><strong>Stín (B)</strong> - skrytý potenciál čísla</li>
+            </ul>
+            <p>Pokud nastane rovnováha (A * B = 1), výsledkem je 1. Jinak se vyhodnotí jako sub-abstraktní převrácená hodnota: 1/(A+B).</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const valueAInput = document.getElementById('valueA');
+            const valueBInput = document.getElementById('valueB');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultTitle = document.querySelector('.result-title');
+            const resultExpression = document.querySelector('.result-expression');
+            const resultValue = document.querySelector('.result-value');
+            const weightA = document.getElementById('weightA');
+            const weightB = document.getElementById('weightB');
+            const balancePoint = document.querySelector('.balance-point');
+            
+            calculateBtn.addEventListener('click', calculate);
+            
+            // Inicializace s příkladem
+            calculate();
+            
+            function calculate() {
+                const A = parseFloat(valueAInput.value);
+                const B = parseFloat(valueBInput.value);
+                
+                if (isNaN(A) || isNaN(B)) {
+                    showError();
+                    return;
+                }
+                
+                // Výpočet podle definice operátoru
+                let result;
+                let isEquilibrium = false;
+                
+                if (A * B === 1) {
+                    result = 1;
+                    isEquilibrium = true;
+                } else {
+                    result = 1 / (A + B);
+                }
+                
+                // Aktualizace vizualizace vah
+                updateScaleVisualization(A, B, isEquilibrium);
+                
+                // Zobrazení výsledku
+                displayResult(A, B, result, isEquilibrium);
+            }
+            
+            function updateScaleVisualization(A, B, isEquilibrium) {
+                // Normalizace hodnot pro vizualizaci
+                const maxVal = Math.max(A, B, 5);
+                const normalizedA = Math.min(A / maxVal * 100, 100);
+                const normalizedB = Math.min(B / maxVal * 100, 100);
+                
+                // Nastavení pozic závaží
+                weightA.style.left = `${50 - normalizedA/2}%`;
+                weightB.style.left = `${50 + normalizedB/2}%`;
+                
+                // Animace vah při rovnováze
+                if (isEquilibrium) {
+                    balancePoint.style.transform = 'translateX(-50%) rotate(0deg)';
+                    weightA.style.transform = 'translateX(-50%)';
+                    weightB.style.transform = 'translateX(-50%)';
+                } else {
+                    // Pokud není rovnováha, vahy se nakloní podle poměru
+                    const tilt = (A - B) * 3;
+                    balancePoint.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
+                }
+            }
+            
+            function displayResult(A, B, result, isEquilibrium) {
+                // Nastavení vzhledu podle typu výsledku
+                if (isEquilibrium) {
+                    resultContainer.className = 'result-container equilibrium';
+                    resultTitle.innerHTML = '⚖️ ROVNOVÁHA!';
+                    resultExpression.textContent = `${A} × ${B} = 1`;
+                    resultValue.textContent = '1';
+                } else {
+                    resultContainer.className = 'result-container subabstract';
+                    resultTitle.innerHTML = '🌌 SUB-ABSTRAKCE!';
+                    resultExpression.textContent = `1/(${A} + ${B}) = ${result.toFixed(4)}`;
+                    resultValue.textContent = result.toFixed(4);
+                }
+            }
+            
+            function showError() {
+                resultContainer.className = 'result-container';
+                resultTitle.innerHTML = '❌ Chyba';
+                resultExpression.textContent = 'Zadejte platná čísla';
+                resultValue.textContent = '-';
+            }
+        });
+    </script>
+</body>
+</html>
