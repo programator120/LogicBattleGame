@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!--
+  Tento súbor vkladá pôvodnú hru Emoji Key Rush pomocou iframe.
+  Pôvodnú hru nájdete na adrese: https://programator120.github.io/moje-html-hry/emoji-key-rush.html
+  Ak chcete hru upravovať, môžete priamo upravovať HTML/JS súbor v tomto repozitári
+  alebo pracovať s kódom zo zdroja vyššie.
+-->
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Key Rush (Embed)</title>
+    <style>
+        /* Základné štýly pre stránku a vkladací rám */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #0d1117;
+            color: #e5e7eb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        header {
+            padding: 20px 16px;
+            background: #0b1220;
+            border-bottom: 1px solid #1f2937;
+        }
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+        }
+        header p {
+            margin: 0;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+        .footer {
+            padding: 10px 16px;
+            background: #0b1220;
+            border-top: 1px solid #1f2937;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .footer a {
+            color: #14b8a6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Emoji Key Rush</h1>
+        <p>Pripravte sa trénovať rýchlosť písania s&nbsp;emoji! Táto stránka vkladá originálnu hru.</p>
+    </header>
+    <main>
+        <iframe
+            src="https://programator120.github.io/moje-html-hry/emoji-key-rush.html"
+            title="Emoji Key Rush">
+        </iframe>
+        <div class="footer">
+            Ak sa hra nezobrazuje, skontrolujte si internetové pripojenie alebo&nbsp;
+            <a href="https://programator120.github.io/moje-html-hry/emoji-key-rush.html" target="_blank">otvorte hru priamo</a>.
+        </div>
+    </main>
+</body>
+</html>
